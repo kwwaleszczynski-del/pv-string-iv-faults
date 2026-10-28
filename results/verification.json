@@ -1,0 +1,171 @@
+{
+  "macro_f1": 0.968,
+  "total_windows": 312,
+  "class_metrics": {
+    "Healthy": {
+      "support": 146,
+      "tp": 146,
+      "fp": 8,
+      "fn": 0,
+      "precision": 0.9481,
+      "recall": 1.0,
+      "f1": 0.9733
+    },
+    "Shorted Bypass Diode": {
+      "support": 52,
+      "tp": 51,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9808,
+      "f1": 0.9903
+    },
+    "High Series Resistance R_s": {
+      "support": 50,
+      "tp": 48,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.96,
+      "f1": 0.9796
+    },
+    "PID / Low R_sh": {
+      "support": 16,
+      "tp": 14,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.875,
+      "f1": 0.9333
+    },
+    "Partial Shading": {
+      "support": 26,
+      "tp": 25,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.9615,
+      "f1": 0.9804
+    },
+    "Uniform Soiling": {
+      "support": 22,
+      "tp": 20,
+      "fp": 0,
+      "fn": 2,
+      "precision": 1.0,
+      "recall": 0.9091,
+      "f1": 0.9524
+    }
+  },
+  "confusion_matrix": {
+    "Healthy": {
+      "Healthy": 146,
+      "Shorted Bypass Diode": 0,
+      "High Series Resistance R_s": 0,
+      "PID / Low R_sh": 0,
+      "Partial Shading": 0,
+      "Uniform Soiling": 0
+    },
+    "Shorted Bypass Diode": {
+      "Healthy": 1,
+      "Shorted Bypass Diode": 51,
+      "High Series Resistance R_s": 0,
+      "PID / Low R_sh": 0,
+      "Partial Shading": 0,
+      "Uniform Soiling": 0
+    },
+    "High Series Resistance R_s": {
+      "Healthy": 2,
+      "Shorted Bypass Diode": 0,
+      "High Series Resistance R_s": 48,
+      "PID / Low R_sh": 0,
+      "Partial Shading": 0,
+      "Uniform Soiling": 0
+    },
+    "PID / Low R_sh": {
+      "Healthy": 2,
+      "Shorted Bypass Diode": 0,
+      "High Series Resistance R_s": 0,
+      "PID / Low R_sh": 14,
+      "Partial Shading": 0,
+      "Uniform Soiling": 0
+    },
+    "Partial Shading": {
+      "Healthy": 1,
+      "Shorted Bypass Diode": 0,
+      "High Series Resistance R_s": 0,
+      "PID / Low R_sh": 0,
+      "Partial Shading": 25,
+      "Uniform Soiling": 0
+    },
+    "Uniform Soiling": {
+      "Healthy": 2,
+      "Shorted Bypass Diode": 0,
+      "High Series Resistance R_s": 0,
+      "PID / Low R_sh": 0,
+      "Partial Shading": 0,
+      "Uniform Soiling": 20
+    }
+  },
+  "bypass_diode_recovery": [
+    {
+      "channel": "MPPT 7",
+      "n_bd_true": 1,
+      "n_bd_est": 1,
+      "dv_true_v": 14.3,
+      "dv_est_v": 14.23,
+      "abs_error_v": 0.07
+    },
+    {
+      "channel": "MPPT 2",
+      "n_bd_true": 2,
+      "n_bd_est": 2,
+      "dv_true_v": 28.6,
+      "dv_est_v": 28.63,
+      "abs_error_v": 0.03
+    },
+    {
+      "channel": "MPPT 8",
+      "n_bd_true": 4,
+      "n_bd_est": 4,
+      "dv_true_v": 57.2,
+      "dv_est_v": 57.41,
+      "abs_error_v": 0.21
+    }
+  ],
+  "series_resistance_recovery": [
+    {
+      "channel": "MPPT 9",
+      "rs_true_ohm": 1.5,
+      "rs_est_ohm": 1.48,
+      "rel_error_pct": -1.33
+    },
+    {
+      "channel": "MPPT 3",
+      "rs_true_ohm": 2.5,
+      "rs_est_ohm": 2.47,
+      "rel_error_pct": -1.2
+    },
+    {
+      "channel": "MPPT 10",
+      "rs_true_ohm": 3.2,
+      "rs_est_ohm": 3.17,
+      "rel_error_pct": -0.94
+    }
+  ],
+  "pid_verification": {
+    "channel": "MPPT 4",
+    "rsh_initial_ohm": 400.0,
+    "rsh_degraded_ohm": 35.0,
+    "n_negative_end_modules": 4,
+    "detection_latency_days": 14,
+    "low_g_voltage_drop_at_detection_pct": 2.2,
+    "steady_low_g_voltage_drop_pct": 3.23
+  },
+  "soiling_verification": {
+    "channel": "MPPT 6",
+    "soiling_true_pct": 4.5,
+    "soiling_est_pct": 4.4,
+    "false_voltage_alarm_rate_pct": 0.0
+  }
+}

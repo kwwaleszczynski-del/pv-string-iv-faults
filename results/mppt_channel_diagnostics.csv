@@ -1,0 +1,13 @@
+channel,label,true_class,predicted_class,n_bd_true,n_bd_est,dv_intercept_true_v,dv_intercept_est_v,extra_rs_true_ohm,extra_rs_est_ohm,slope_dv_di_ohm,v_norm_median,i_norm_median,low_g_v_drop_pct,dv_norm_slope_per_kwm2,pid_detection_days,soiling_true_pct,soiling_est_pct,false_voltage_alarms_pct,annual_energy_mwh,lost_energy_true_mwh,lost_energy_est_mwh
+MPPT 1,MPPT 1: Healthy,Healthy,Healthy,0,0,0.0,-0.17,0.0,0.0,0.008,1.0,1.0008,-0.03,-0.0005,0,0.0,0.0,0.0,21.835,0.001,0.0
+MPPT 2,MPPT 2: 2 Shorted Bypass Diodes,Shorted Bypass Diode,Shorted Bypass Diode,2,2,28.6,28.63,0.0,0.0,-0.031,0.9704,1.0008,2.87,-0.0022,0,0.0,0.0,0.0,21.387,0.449,0.431
+MPPT 3,MPPT 3: Corroded MC4 (+2.5 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.15,2.5,2.47,2.477,0.9796,0.9972,0.66,-0.0363,0,0.0,0.0,0.0,21.613,0.223,0.205
+MPPT 4,MPPT 4: PID Shunt Degradation,PID / Low R_sh,PID / Low R_sh,0,0,0.0,37.41,0.0,0.0,-2.209,0.9796,0.9919,3.23,0.0313,14,0.0,0.0,0.0,21.482,0.354,0.337
+MPPT 5,MPPT 5: Morning Row/Chimney Shading,Partial Shading,Partial Shading,0,0,0.0,3.63,0.0,0.0,-0.327,1.0,1.0007,-0.03,-0.0004,0,0.0,0.0,0.0,21.518,0.318,0.3
+MPPT 6,MPPT 6: 4.5 % Soiling,Uniform Soiling,Uniform Soiling,0,0,0.0,0.55,0.0,0.0,0.0,0.9994,0.9557,0.03,-0.0004,0,4.5,4.4,0.0,20.885,0.951,0.933
+MPPT 7,MPPT 7: 1 Shorted Bypass Diode,Shorted Bypass Diode,Shorted Bypass Diode,1,1,14.3,14.23,0.0,0.0,-0.011,0.9853,1.0007,1.42,-0.0012,0,0.0,0.0,0.0,21.561,0.275,0.257
+MPPT 8,MPPT 8: 4 Shorted Bypass Diodes,Shorted Bypass Diode,Shorted Bypass Diode,4,4,57.2,57.41,0.0,0.0,-0.067,0.9407,1.0008,5.76,-0.0041,0,0.0,0.0,0.0,21.137,0.699,0.681
+MPPT 9,MPPT 9: Solder Joint (+1.5 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.2,1.5,1.48,1.492,0.9878,0.9987,0.38,-0.022,0,0.0,0.0,0.0,21.558,0.278,0.261
+MPPT 10,MPPT 10: Loose MC4 (+3.2 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.15,3.2,3.17,3.179,0.9738,0.9961,0.86,-0.0462,0,0.0,0.0,0.0,21.286,0.55,0.532
+MPPT 11,MPPT 11: Healthy,Healthy,Healthy,0,0,0.0,-0.14,0.0,0.0,0.005,1.0,1.0008,-0.03,-0.0004,0,0.0,0.0,0.0,21.836,0.0,0.0
+MPPT 12,MPPT 12: Healthy,Healthy,Healthy,0,0,0.0,-0.17,0.0,0.0,0.008,1.0,1.0007,-0.03,-0.0005,0,0.0,0.0,0.0,21.836,0.0,0.0

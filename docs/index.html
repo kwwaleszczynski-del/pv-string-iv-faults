@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PV string fault diagnosis from inverter MPPT voltage and current</title>
+<meta name="description" content="Separating shorted bypass diodes, PID voltage loss, series-resistance degradation, partial shading and soiling from 15-minute inverter MPPT voltage and current alone, verified on a sub-string one-diode model.">
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10); --accent: #2a78d6;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #7a52b3; --bad: #c8423b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --accent: #3987e5;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #9b73d4; --bad: #d4574f;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10); --accent: #3987e5;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #9b73d4; --bad: #d4574f;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+       font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.7rem; margin: 0 0 6px; }
+h2 { font-size: 1.2rem; margin: 36px 0 6px; }
+p { color: var(--ink2); margin: 6px 0 12px; max-width: 84ch; }
+a { color: var(--accent); }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
+.tile .v { font-size: 1.45rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.tile .l { color: var(--ink2); font-size: 0.85rem; }
+.plot { width: 100%; height: 420px; }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;
+            align-items: center; margin: 12px 0; color: var(--ink2); font-size: 0.9rem; }
+select, input[type="range"] { font: inherit; accent-color: var(--accent); }
+select { padding: 5px 8px; border-radius: 6px; border: 1px solid var(--ring); background: var(--surface);
+         color: var(--ink); width: 100%; }
+.ctrl-box { display: flex; flex-direction: column; gap: 4px; }
+.ctrl-head { display: flex; justify-content: space-between; font-size: 0.84rem; color: var(--ink2); }
+.ctrl-val { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.84rem; }
+th, td { border-bottom: 1px solid var(--grid); padding: 6px 8px; text-align: left; white-space: nowrap; }
+th { color: var(--ink2); font-weight: 600; cursor: pointer; user-select: none; position: sticky; top: 0;
+     background: var(--surface); }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.note { font-size: 0.84rem; color: var(--muted); }
+.warn { border-left: 3px solid var(--s2); padding-left: 10px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 14px; }
+.badge { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.78rem; font-weight: 600;
+         background: rgba(42,120,214,0.12); color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+<h1>PV string fault diagnosis from inverter MPPT voltage and current</h1>
+<p>Separating shorted bypass diodes, potential-induced degradation (PID) shunt loss, corroded MC4 / solder-joint
+series resistance, morning obstacle shading and uniform soiling from 15-minute inverter MPPT voltage and current
+alone, without a field I-V curve tracer. Verified on a 72-sub-string single-diode and reverse-bias breakdown model
+(Bishop 1988) across a 12-MPPT commercial string inverter (24 &times; 550 Wp half-cut mono-PERC modules per string,
+V<sub>mp,STC</sub> = 1,003 V, I<sub>mp,STC</sub> = 13.16 A). Code and method:
+<a href="https://github.com/kwwaleszczynski-del/pv-string-iv-faults">github.com/kwwaleszczynski-del/pv-string-iv-faults</a>.</p>
+<p class="warn">Working engineering material. SCADA MPPT telemetry isolates the faulty MPPT channel and separates
+step-voltage, ohmic-slope, low-irradiance shunt and current-loss signatures; physical confirmation on the roof or
+field still requires an electroluminescence (EL) camera, thermal inspection or a handheld I-V / insulation tester before
+replacing modules or connectors.</p>
+
+<div class="tiles" id="tiles"></div>
+
+<h2>1. Interactive 72-sub-string I-V / P-V &amp; &Delta;V(I) diagnostic lab</h2>
+<p>Select one of the six headline MPPT channels or move the sliders to inject custom shorted sub-strings
+(n<sub>bd</sub> = 0&ndash;6), extra series resistance (&Delta;R<sub>s</sub> = 0&ndash;5 &Omega;) and plane-of-array
+irradiance (G<sub>poa</sub> = 200&ndash;1,000 W/m&sup2;) directly into the 72-sub-string single-diode model.
+Notice how shorted bypass diodes shift V<sub>mppt</sub> left by 14.3 V per sub-string at constant slope
+(&part;&Delta;V/&part;I &approx; 0), whereas series resistance tilts the knee and makes &Delta;V(I) = &Delta;R<sub>s</sub> &middot; I
+grow linearly with current.</p>
+
+<div class="card" style="margin-bottom:14px">
+  <div class="controls">
+    <div class="ctrl-box">
+      <div class="ctrl-head"><span>Fault Mode / MPPT Channel preset</span><span class="badge" id="preset-badge">Healthy</span></div>
+      <select id="channel-select">
+        <option value="MPPT 1">MPPT 1: Healthy</option>
+        <option value="MPPT 2" selected>MPPT 2: 2 Shorted Bypass Diodes</option>
+        <option value="MPPT 3">MPPT 3: Corroded MC4 (+2.5 Ohm R_s)</option>
+        <option value="MPPT 4">MPPT 4: PID Shunt Degradation</option>
+        <option value="MPPT 5">MPPT 5: Morning Row/Chimney Shading</option>
+        <option value="MPPT 6">MPPT 6: 4.5 % Soiling</option>
+      </select>
+    </div>
+    <div class="ctrl-box">
+      <div class="ctrl-head"><span>Shorted Sub-strings (n<sub>bd</sub>)</span><span class="ctrl-val" id="val-nbd">2 sub-strings (-28.6 V)</span></div>
+      <input type="range" id="slider-nbd" min="0" max="6" step="1" value="2">
+    </div>
+    <div class="ctrl-box">
+      <div class="ctrl-head"><span>Extra R<sub>s</sub> (&Delta;R<sub>s</sub>)</span><span class="ctrl-val" id="val-rs">0.0 &Omega;</span></div>
+      <input type="range" id="slider-rs" min="0" max="5" step="0.1" value="0.0">
+    </div>
+    <div class="ctrl-box">
+      <div class="ctrl-head"><span>Irradiance G<sub>poa</sub></span><span class="ctrl-val" id="val-g">900 W/m&sup2;</span></div>
+      <input type="range" id="slider-g" min="200" max="1000" step="25" value="900">
+    </div>
+  </div>
+  <p class="note" id="live-readout" style="margin:6px 0 0"></p>
+</div>
+
+<div class="two">
+  <div class="card"><div id="iv-pv-plot" class="plot"></div></div>
+  <div class="card"><div id="dv-i-plot" class="plot"></div></div>
+</div>
+
+<h2>2. Low-irradiance PID droop &amp; 12-month daily MPPT timeline</h2>
+<p>Left: normalised operating voltage ratio v<sub>k</sub> = V<sub>mppt,k</sub> / V<sub>peer</sub> across plane-of-array
+irradiance bins, isolating PID shunt conductance degradation (R<sub>sh</sub> dropping from 400 &Omega; to 35 &Omega; on
+4 negative-end modules, which pulls v<sub>k</sub> down below 300 W/m&sup2;). Right: 12-month daily median peer voltage
+deficit &Delta;V<sub>k</sub> and normalised current ratio i<sub>k</sub> for the selected channel.</p>
+<div class="two">
+  <div class="card"><div id="pid-g-plot" class="plot"></div></div>
+  <div class="card"><div id="timeline-plot" class="plot"></div></div>
+</div>
+
+<h2>3. 12-MPPT fleet diagnostic table</h2>
+<p class="note">Click any column header to sort. Recovery metrics are evaluated over post-onset daytime operation
+from 15-minute (V<sub>mppt</sub>, I<sub>mppt</sub>, G<sub>poa</sub>, T<sub>amb</sub>) alone.</p>
+<div class="card scroll"><table id="fleet-table"></table></div>
+
+<h2>4. Verification summary &amp; 6-class confusion matrix</h2>
+<p>Evaluated across 312 bi-weekly (14-day) channel windows on the 12-MPPT inverter over the full year, plus parameter
+recovery parity against known physical injections.</p>
+<div class="two">
+  <div class="card scroll"><table id="ver-table"></table></div>
+  <div class="card scroll"><table id="conf-table"></table></div>
+</div>
+
+<p class="note" style="margin-top:28px">Companion repositories:
+<a href="https://github.com/kwwaleszczynski-del/pv-budget-bridge">pv-budget-bridge</a> (monthly P50-to-actual energy
+waterfall and sensor QC) and
+<a href="https://github.com/kwwaleszczynski-del/pv-outage-classifier">pv-outage-classifier</a> (inverter and string
+outage classification).</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"
+        integrity="sha384-cCVCZkAjYNxaYKbM8lsArLznDF/SvMFr1jcZrvOpSTCa0W40ZAdLzHCEulnUa5i7" crossorigin="anonymous"></script>
+<script src="data.js"></script>
+<script>
+const D = window.DATA;
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt = (x, d = 1) => x == null || isNaN(x) ? "-" : Number(x).toFixed(d);
+const pct = (x, d = 1) => x == null || isNaN(x) ? "-" : Number(x).toFixed(d) + " %";
+const narrow = () => window.innerWidth < 640;
+const cfg = {responsive: true, displaylogo: false};
+
+function layoutBase(extra) {
+  return Object.assign({
+    paper_bgcolor: css("--surface"),
+    plot_bgcolor: css("--surface"),
+    font: {family: "system-ui, -apple-system, Segoe UI, sans-serif", color: css("--ink2"), size: 12},
+    margin: {l: 56, r: 52, t: 28, b: 48},
+    hoverlabel: {bgcolor: css("--surface"), font: {color: css("--ink")}},
+    legend: narrow() ? {orientation: "h", y: -0.24, x: 0, font: {size: 10}} : {orientation: "h", y: 1.08, x: 0, font: {size: 11}}
+  }, extra);
+}
+const axis = extra => Object.assign({gridcolor: css("--grid"), linecolor: css("--axis"), zeroline: false}, extra);
+
+function renderTiles() {
+  const V = D.verification;
+  const S = D.spec;
+  const bdErr = Math.max(...V.bypass_diode_recovery.map(r => r.abs_error_v));
+  const rs15 = V.series_resistance_recovery.find(r => Math.abs(r.rs_true_ohm - 1.5) < 0.05);
+  const rs32 = V.series_resistance_recovery.find(r => Math.abs(r.rs_true_ohm - 3.2) < 0.05);
+  const items = [
+    [`${S.n_substrings} sub-strings / string`, `24 \u00d7 550 Wp half-cut modules, V_mp,STC = ${fmt(S.v_mp_string_stc_v, 0)} V, I_mp,STC = ${fmt(S.i_mp_stc_a, 2)} A`],
+    [`100 % (max err ${fmt(bdErr, 2)} V)`, `shorted bypass diode count recovery (n_bd = 1, 2, 4 at 14.3 V / sub-string)`],
+    [`${fmt(rs15.rs_est_ohm, 2)} / ${fmt(rs32.rs_est_ohm, 2)} \u03a9`, `recovered \u0394R_s against 1.50 \u03a9 and 3.20 \u03a9 truth (< 2 % error)`],
+    [`${V.pid_verification.detection_latency_days} days`, `PID shunt degradation detected once low-G (< 300 W/m\u00b2) voltage ratio drops by 2.2 %`],
+    [`${fmt(V.soiling_verification.soiling_est_pct, 1)} % / 0.0 %`, `recovered soiling loss vs 4.5 % truth, with 0.0 % false voltage-fault alarms`],
+    [`${fmt(V.macro_f1, 3)} macro-F1`, `6-class fault classification across ${V.total_windows} bi-weekly MPPT channel windows`]
+  ];
+  document.getElementById("tiles").innerHTML = items.map(x =>
+    `<div class="card tile"><div class="v">${x[0]}</div><div class="l">${x[1]}</div></div>`).join("");
+}
+
+// Live 72-sub-string single-diode + Bishop bypass model in JS for instant slider response
+function computeLiveStringCurve(gPoa, nBd, extraRs, presetChannel) {
+  const nTotal = 72;
+  const tAmb = 22.0;
+  const tCell = tAmb + (gPoa / 1000.0) * (800.0 / 29.0);
+  const dt = tCell - 25.0;
+
+  let nShaded = 0, shadeTrans = 1.0, nPid = 0, rshPid = 400.0 / 3.0, soilFrac = 0.0;
+  if (presetChannel === "MPPT 4" && nBd === 0 && extraRs === 0) {
+    nPid = 12; rshPid = 35.0 / 3.0;
+  } else if (presetChannel === "MPPT 5" && nBd === 0 && extraRs === 0) {
+    nShaded = 6; shadeTrans = 0.35;
+  } else if (presetChannel === "MPPT 6" && nBd === 0 && extraRs === 0) {
+    soilFrac = 0.045;
+  }
+
+  const gEff = gPoa * (1.0 - soilFrac);
+  const iScHealthy = 13.98 * (gPoa / 1000.0) * (1.0 + 0.00048 * dt);
+  const iScEff = 13.98 * (gEff / 1000.0) * (1.0 + 0.00048 * dt);
+  const aT = 24 * 1.125 * 0.0256926 * ((tCell + 273.15) / 298.15);
+  const vOcSub = (16.60 * (1.0 - 0.0027 * dt) + aT * Math.log(Math.max(gEff / 1000.0, 1e-3)));
+  const vOcHealthy = (16.60 * (1.0 - 0.0027 * dt) + aT * Math.log(Math.max(gPoa / 1000.0, 1e-3)));
+
+  function subV(iVal, iScLocal, vOcLocal, rshSub) {
+    if (iVal <= iScLocal) {
+      const arg = Math.max(1.0 - (iVal / Math.max(iScLocal, 0.01)), 1e-5);
+      const vJ = vOcLocal + aT * Math.log(arg) - 0.14 * (iVal / Math.max(rshSub, 2.0));
+      return Math.max(vJ - iVal * 0.0445, -0.55);
+    }
+    return -0.55 - 0.02 * (iVal - iScLocal);
+  }
+
+  const N = 160;
+  const vHealthyArr = [], iHealthyArr = [], pHealthyArr = [];
+  const vFaultArr = [], iFaultArr = [], pFaultArr = [];
+  let pMaxH = -1, vMpH = 0, iMpH = 0;
+  let pMaxF = -1, vMpF = 0, iMpF = 0;
+
+  for (let k = 0; k < N; k++) {
+    const iStr = (k / (N - 1)) * iScHealthy * 1.005;
+    const vSubH = Math.max(subV(iStr, iScHealthy, vOcHealthy, 133.3), 0);
+    const vStrH = 72 * vSubH;
+    const pStrH = vStrH * iStr;
+    vHealthyArr.push(vStrH);
+    iHealthyArr.push(iStr);
+    pHealthyArr.push(pStrH / 1000.0);
+    if (pStrH > pMaxH) { pMaxH = pStrH; vMpH = vStrH; iMpH = iStr; }
+
+    const nH = nTotal - nBd - nPid - nShaded;
+    const vSubF = subV(iStr, iScEff, vOcSub, 133.3);
+    let vTot = nH * vSubF - nBd * 0.367;
+    if (nPid > 0) {
+      const lowGWeight = Math.min(Math.max((1000.0 - gEff) / 800.0, 0.15), 1.0);
+      const vSubP = subV(iStr, iScEff, vOcSub * (1.0 - 0.14 * (0.35 + 0.95 * lowGWeight)), rshPid);
+      vTot += nPid * vSubP;
+    }
+    if (nShaded > 0) {
+      const vSubS = subV(iStr, iScEff * shadeTrans, vOcSub - 0.5, 133.3);
+      vTot += nShaded * vSubS;
+    }
+    vTot -= iStr * extraRs;
+    if (vTot >= 0 && iStr <= iScEff * 1.002) {
+      vFaultArr.push(vTot);
+      iFaultArr.push(iStr);
+      const pF = vTot * iStr;
+      pFaultArr.push(pF / 1000.0);
+      if (pF > pMaxF) { pMaxF = pF; vMpF = vTot; iMpF = iStr; }
+    }
+  }
+  return {
+    vH: vHealthyArr, iH: iHealthyArr, pH: pHealthyArr, vMpH, iMpH, pMpH: pMaxH / 1000.0,
+    vF: vFaultArr, iF: iFaultArr, pF: pFaultArr, vMpF, iMpF, pMpF: pMaxF / 1000.0
+  };
+}
+
+function updateLabPlots() {
+  const ch = document.getElementById("channel-select").value;
+  const nBd = Number(document.getElementById("slider-nbd").value);
+  const extraRs = Number(document.getElementById("slider-rs").value);
+  const gPoa = Number(document.getElementById("slider-g").value);
+
+  document.getElementById("val-nbd").textContent = `${nBd} sub-string${nBd === 1 ? "" : "s"} (${fmt(-nBd * 14.3, 1)} V)`;
+  document.getElementById("val-rs").textContent = `${fmt(extraRs, 1)} \u03a9`;
+  document.getElementById("val-g").textContent = `${fmt(gPoa, 0)} W/m\u00b2`;
+
+  const chData = D.channels[ch];
+  document.getElementById("preset-badge").textContent = chData.fault_class;
+
+  const sim = computeLiveStringCurve(gPoa, nBd, extraRs, ch);
+  const dvNow = sim.vMpH - sim.vMpF;
+  document.getElementById("live-readout").innerHTML =
+    `<strong>Live operating point @ ${fmt(gPoa, 0)} W/m&sup2;:</strong> ` +
+    `Healthy peer MPPT = <strong>${fmt(sim.vMpH, 1)} V</strong>, <strong>${fmt(sim.iMpH, 2)} A</strong> (${fmt(sim.pMpH, 2)} kW) &nbsp;|&nbsp; ` +
+    `Faulted string MPPT = <strong>${fmt(sim.vMpF, 1)} V</strong>, <strong>${fmt(sim.iMpF, 2)} A</strong> (${fmt(sim.pMpF, 2)} kW) &nbsp;|&nbsp; ` +
+    `Voltage deficit &Delta;V = <strong>${fmt(dvNow, 1)} V</strong> (step intercept &approx; ${fmt(nBd * 14.3, 1)} V, ohmic drop &approx; ${fmt(extraRs * sim.iMpF, 1)} V)`;
+
+  Plotly.react("iv-pv-plot", [
+    {type: "scatter", mode: "lines", x: sim.vH, y: sim.iH, name: "Healthy I-V", line: {color: css("--muted"), dash: "dot", width: 1.6}},
+    {type: "scatter", mode: "lines", x: sim.vF, y: sim.iF, name: "Faulted I-V (left)", line: {color: css("--s1"), width: 2.3}},
+    {type: "scatter", mode: "lines", x: sim.vH, y: sim.pH, name: "Healthy P-V [kW]", yaxis: "y2", line: {color: css("--axis"), dash: "dot", width: 1.5}},
+    {type: "scatter", mode: "lines", x: sim.vF, y: sim.pF, name: "Faulted P-V [kW] (right)", yaxis: "y2", line: {color: css("--s2"), width: 2.1}},
+    {type: "scatter", mode: "markers", x: [sim.vMpH, sim.vMpF], y: [sim.pMpH, sim.pMpF], yaxis: "y2",
+     name: "MPPT peak", marker: {color: [css("--muted"), css("--bad")], size: 9, symbol: ["circle-open", "diamond"]}}
+  ], layoutBase({
+    title: {text: `72-sub-string I-V & P-V curve (G = ${gPoa} W/m\u00b2)`, font: {size: 13}},
+    xaxis: axis({range: [0, 1220], title: {text: "String voltage V [V]", font: {size: 12}}}),
+    yaxis: axis({range: [0, 14.5], title: {text: "String current I [A]", font: {size: 12}}}),
+    yaxis2: axis({overlaying: "y", side: "right", range: [0, 14.5], showgrid: false, title: {text: "String power P [kW]", font: {size: 12}}})
+  }), cfg);
+
+  // Right chart: Delta V(I) diagnostic plane showing selected channel 15-min telemetry + live slider line
+  const iLine = [1.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.2];
+  const dvLine = iLine.map(i => nBd * 14.3 + 0.989 * extraRs * i);
+  const sc = chData.scatter_dv_i;
+  Plotly.react("dv-i-plot", [
+    {type: "scatter", mode: "markers", x: sc.i_a, y: sc.dv_v, name: `${ch} 15-min telemetry`,
+     marker: {color: css("--s1"), size: 5, opacity: 0.55},
+     hovertemplate: "I = %{x:.2f} A<br>\u0394V = %{y:.1f} V<extra></extra>"},
+    {type: "scatter", mode: "lines", x: iLine, y: dvLine,
+     name: `Live model: \u0394V(I) = ${fmt(nBd * 14.3, 1)} V + ${fmt(extraRs, 1)} \u03a9 \u00b7 I`,
+     line: {color: css("--s2"), width: 2.4}},
+    {type: "scatter", mode: "markers", x: [sim.iMpF], y: [dvNow], name: "Current slider MPPT point",
+     marker: {color: css("--bad"), size: 10, symbol: "diamond"}}
+  ], layoutBase({
+    title: {text: "Diagnostic plane: voltage deficit \u0394V_k vs string current I_mppt", font: {size: 13}},
+    xaxis: axis({range: [0.5, 13.8], title: {text: "String current I_mppt [A]", font: {size: 12}}}),
+    yaxis: axis({range: [-5, 95], title: {text: "Peer voltage deficit \u0394V_k = V_peer - V_k [V]", font: {size: 12}}})
+  }), cfg);
+
+  // Section 2 plots: PID low-irradiance curve and 12-month timeline for selected channel
+  const chPid = D.channels["MPPT 4"].scatter_dv_i;
+  const chHealthy = D.channels["MPPT 1"].scatter_dv_i;
+  Plotly.react("pid-g-plot", [
+    {type: "scatter", mode: "markers", x: chHealthy.g_wm2, y: chHealthy.v_norm, name: "MPPT 1: Healthy",
+     marker: {color: css("--muted"), size: 4, opacity: 0.4}},
+    {type: "scatter", mode: "markers", x: chPid.g_wm2, y: chPid.v_norm, name: "MPPT 4: PID (R_sh = 35 \u03a9)",
+     marker: {color: css("--s4"), size: 5, opacity: 0.55}},
+    {type: "scatter", mode: "markers", x: sc.g_wm2, y: sc.v_norm, name: chData.label,
+     marker: {color: css("--s1"), size: 5, opacity: 0.65}}
+  ], layoutBase({
+    title: {text: "Normalised voltage ratio v_k vs irradiance G_poa", font: {size: 13}},
+    xaxis: axis({range: [100, 1050], title: {text: "POA irradiance G_poa [W/m\u00b2]", font: {size: 12}}}),
+    yaxis: axis({range: [0.90, 1.015], title: {text: "v_k = V_mppt,k / V_peer [-]", font: {size: 12}}})
+  }), cfg);
+
+  const dl = chData.daily;
+  const dlSoil = D.channels["MPPT 6"].daily;
+  Plotly.react("timeline-plot", [
+    {type: "scatter", mode: "lines", x: dl.date, y: dl.dv_med, name: `${ch} daily median \u0394V_k [V] (left)`,
+     line: {color: css("--s1"), width: 1.8}},
+    {type: "scatter", mode: "lines", x: dl.date, y: dl.i_norm, name: `${ch} current ratio i_k (right)`,
+     yaxis: "y2", line: {color: css("--s3"), width: 1.6, dash: "dot"}},
+    {type: "scatter", mode: "lines", x: dlSoil.date, y: dlSoil.i_norm, name: "MPPT 6 rain-washed soiling i_k (right)",
+     yaxis: "y2", line: {color: css("--s2"), width: 1.2}}
+  ], layoutBase({
+    title: {text: `12-month daily tracking: ${chData.label}`, font: {size: 13}},
+    xaxis: axis({type: "date", title: {text: "Date (2025)", font: {size: 12}}}),
+    yaxis: axis({range: [-4, 65], title: {text: "Daily median \u0394V_k [V]", font: {size: 12}}}),
+    yaxis2: axis({overlaying: "y", side: "right", range: [0.93, 1.02], showgrid: false, title: {text: "Current ratio i_k [-]", font: {size: 12}}})
+  }), cfg);
+}
+
+const PRESETS = {
+  "MPPT 1": {nbd: 0, rs: 0.0, g: 900},
+  "MPPT 2": {nbd: 2, rs: 0.0, g: 900},
+  "MPPT 3": {nbd: 0, rs: 2.5, g: 900},
+  "MPPT 4": {nbd: 0, rs: 0.0, g: 250},
+  "MPPT 5": {nbd: 0, rs: 0.0, g: 650},
+  "MPPT 6": {nbd: 0, rs: 0.0, g: 900}
+};
+
+document.getElementById("channel-select").addEventListener("change", e => {
+  const p = PRESETS[e.target.value] || {nbd: 0, rs: 0.0, g: 900};
+  document.getElementById("slider-nbd").value = p.nbd;
+  document.getElementById("slider-rs").value = p.rs;
+  document.getElementById("slider-g").value = p.g;
+  updateLabPlots();
+});
+["slider-nbd", "slider-rs", "slider-g"].forEach(id => {
+  document.getElementById(id).addEventListener("input", updateLabPlots);
+});
+
+const COLS = [
+  ["channel", "Channel", r => r.channel],
+  ["true_class", "Injected fault", r => r.true_class],
+  ["predicted_class", "Diagnosed class", r => r.predicted_class],
+  ["n_bd_true", "True n_bd", r => r.n_bd_true, 1],
+  ["n_bd_est", "Est. n_bd", r => r.n_bd_est, 1],
+  ["dv_intercept_est_v", "\u0394V_0 intercept [V]", r => fmt(r.dv_intercept_est_v, 1), 1],
+  ["extra_rs_true_ohm", "True \u0394R_s [\u03a9]", r => fmt(r.extra_rs_true_ohm, 2), 1],
+  ["extra_rs_est_ohm", "Est. \u0394R_s [\u03a9]", r => fmt(r.extra_rs_est_ohm, 2), 1],
+  ["low_g_v_drop_pct", "Low-G V drop [%]", r => fmt(r.low_g_v_drop_pct, 2), 1],
+  ["i_norm_median", "Median i_k [-]", r => fmt(r.i_norm_median, 3), 1],
+  ["annual_energy_mwh", "Energy [MWh]", r => fmt(r.annual_energy_mwh, 2), 1],
+  ["lost_energy_true_mwh", "True loss [MWh]", r => fmt(r.lost_energy_true_mwh, 2), 1],
+  ["lost_energy_est_mwh", "Est. loss [MWh]", r => fmt(r.lost_energy_est_mwh, 2), 1]
+];
+let sortKey = "channel", sortDir = 1;
+function renderFleetTable() {
+  const rows = [...D.fleet_table].sort((a, b) => {
+    const x = a[sortKey], y = b[sortKey];
+    if (x === y) return 0;
+    return (x > y ? 1 : -1) * sortDir;
+  });
+  const t = document.getElementById("fleet-table");
+  t.innerHTML = "<thead><tr>" + COLS.map(c => `<th data-k="${c[0]}" class="${c[3] ? "n" : ""}">${c[1]}</th>`).join("") +
+    "</tr></thead><tbody>" + rows.map(r => "<tr>" + COLS.map(c => `<td class="${c[3] ? "n" : ""}">${c[2](r)}</td>`).join("") +
+    "</tr>").join("") + "</tbody>";
+  t.querySelectorAll("th").forEach(th => th.onclick = () => {
+    const k = th.dataset.k; sortDir = k === sortKey ? -sortDir : 1; sortKey = k; renderFleetTable();
+  });
+}
+
+function renderVerificationTables() {
+  const V = D.verification;
+  const verRows = [
+    ["1 shorted bypass diode (MPPT 7)", "n_bd = 1, \u0394V = 14.3 V", `n_bd = ${V.bypass_diode_recovery[0].n_bd_est}, \u0394V_0 = ${fmt(V.bypass_diode_recovery[0].dv_est_v, 1)} V`],
+    ["2 shorted bypass diodes (MPPT 2)", "n_bd = 2, \u0394V = 28.6 V", `n_bd = ${V.bypass_diode_recovery[1].n_bd_est}, \u0394V_0 = ${fmt(V.bypass_diode_recovery[1].dv_est_v, 1)} V`],
+    ["4 shorted bypass diodes (MPPT 8)", "n_bd = 4, \u0394V = 57.2 V", `n_bd = ${V.bypass_diode_recovery[2].n_bd_est}, \u0394V_0 = ${fmt(V.bypass_diode_recovery[2].dv_est_v, 1)} V`],
+    ["Solder joint series resistance (MPPT 9)", "+1.50 \u03a9", `${fmt(V.series_resistance_recovery[0].rs_est_ohm, 2)} \u03a9 (${fmt(V.series_resistance_recovery[0].rel_error_pct, 1)} %)`],
+    ["Corroded MC4 connector (MPPT 3)", "+2.50 \u03a9", `${fmt(V.series_resistance_recovery[1].rs_est_ohm, 2)} \u03a9 (${fmt(V.series_resistance_recovery[1].rel_error_pct, 1)} %)`],
+    ["Severely corroded MC4 (MPPT 10)", "+3.20 \u03a9", `${fmt(V.series_resistance_recovery[2].rs_est_ohm, 2)} \u03a9 (${fmt(V.series_resistance_recovery[2].rel_error_pct, 1)} %)`],
+    ["PID on 4 negative-end modules (MPPT 4)", "R_sh: 400 \u2192 35 \u03a9", `Flagged ${V.pid_verification.detection_latency_days} days after onset at 2.2 % low-G voltage drop`],
+    ["Uniform string soiling (MPPT 6)", "4.5 % current loss", `${fmt(V.soiling_verification.soiling_est_pct, 1)} % recovered, ${fmt(V.soiling_verification.false_voltage_alarm_rate_pct, 1)} % false voltage alarms`],
+    ["6-class fault classification macro-F1", "1.000 ideal", `${fmt(V.macro_f1, 3)} across ${V.total_windows} bi-weekly channel windows`]
+  ];
+  document.getElementById("ver-table").innerHTML =
+    "<thead><tr><th>Verification test</th><th>Injected truth</th><th>Recovered estimate</th></tr></thead><tbody>" +
+    verRows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("") + "</tbody>";
+
+  const classes = Object.keys(V.class_metrics);
+  document.getElementById("conf-table").innerHTML =
+    "<thead><tr><th>Class</th><th class='n'>Windows</th><th class='n'>Precision</th><th class='n'>Recall</th><th class='n'>F1</th></tr></thead><tbody>" +
+    classes.map(c => {
+      const m = V.class_metrics[c];
+      return `<tr><td>${c}</td><td class="n">${m.support}</td><td class="n">${fmt(m.precision, 3)}</td><td class="n">${fmt(m.recall, 3)}</td><td class="n"><strong>${fmt(m.f1, 3)}</strong></td></tr>`;
+    }).join("") + "</tbody>";
+}
+
+function renderAll() {
+  renderTiles();
+  updateLabPlots();
+  renderFleetTable();
+  renderVerificationTables();
+}
+renderAll();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+let resizeTimer;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderAll, 200); });
+</script>
+</body>
+</html>
