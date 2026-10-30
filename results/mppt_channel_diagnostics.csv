@@ -1,13 +1,13 @@
-channel,label,true_class,predicted_class,n_bd_true,n_bd_est,dv_intercept_true_v,dv_intercept_est_v,extra_rs_true_ohm,extra_rs_est_ohm,slope_dv_di_ohm,v_norm_median,i_norm_median,low_g_v_drop_pct,dv_norm_slope_per_kwm2,pid_detection_days,soiling_true_pct,soiling_est_pct,false_voltage_alarms_pct,annual_energy_mwh,lost_energy_true_mwh,lost_energy_est_mwh
-MPPT 1,MPPT 1: Healthy,Healthy,Healthy,0,0,0.0,-0.17,0.0,0.0,0.008,1.0,1.0008,-0.03,-0.0005,0,0.0,0.0,0.0,21.835,0.001,0.0
-MPPT 2,MPPT 2: 2 Shorted Bypass Diodes,Shorted Bypass Diode,Shorted Bypass Diode,2,2,28.6,28.63,0.0,0.0,-0.031,0.9704,1.0008,2.87,-0.0022,0,0.0,0.0,0.0,21.387,0.449,0.431
-MPPT 3,MPPT 3: Corroded MC4 (+2.5 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.15,2.5,2.47,2.477,0.9796,0.9972,0.66,-0.0363,0,0.0,0.0,0.0,21.613,0.223,0.205
-MPPT 4,MPPT 4: PID Shunt Degradation,PID / Low R_sh,PID / Low R_sh,0,0,0.0,37.41,0.0,0.0,-2.209,0.9796,0.9919,3.23,0.0313,14,0.0,0.0,0.0,21.482,0.354,0.337
-MPPT 5,MPPT 5: Morning Row/Chimney Shading,Partial Shading,Partial Shading,0,0,0.0,3.63,0.0,0.0,-0.327,1.0,1.0007,-0.03,-0.0004,0,0.0,0.0,0.0,21.518,0.318,0.3
-MPPT 6,MPPT 6: 4.5 % Soiling,Uniform Soiling,Uniform Soiling,0,0,0.0,0.55,0.0,0.0,0.0,0.9994,0.9557,0.03,-0.0004,0,4.5,4.4,0.0,20.885,0.951,0.933
-MPPT 7,MPPT 7: 1 Shorted Bypass Diode,Shorted Bypass Diode,Shorted Bypass Diode,1,1,14.3,14.23,0.0,0.0,-0.011,0.9853,1.0007,1.42,-0.0012,0,0.0,0.0,0.0,21.561,0.275,0.257
-MPPT 8,MPPT 8: 4 Shorted Bypass Diodes,Shorted Bypass Diode,Shorted Bypass Diode,4,4,57.2,57.41,0.0,0.0,-0.067,0.9407,1.0008,5.76,-0.0041,0,0.0,0.0,0.0,21.137,0.699,0.681
-MPPT 9,MPPT 9: Solder Joint (+1.5 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.2,1.5,1.48,1.492,0.9878,0.9987,0.38,-0.022,0,0.0,0.0,0.0,21.558,0.278,0.261
-MPPT 10,MPPT 10: Loose MC4 (+3.2 Ohm R_s),High Series Resistance R_s,High Series Resistance R_s,0,0,0.0,-0.15,3.2,3.17,3.179,0.9738,0.9961,0.86,-0.0462,0,0.0,0.0,0.0,21.286,0.55,0.532
-MPPT 11,MPPT 11: Healthy,Healthy,Healthy,0,0,0.0,-0.14,0.0,0.0,0.005,1.0,1.0008,-0.03,-0.0004,0,0.0,0.0,0.0,21.836,0.0,0.0
-MPPT 12,MPPT 12: Healthy,Healthy,Healthy,0,0,0.0,-0.17,0.0,0.0,0.008,1.0,1.0007,-0.03,-0.0005,0,0.0,0.0,0.0,21.836,0.0,0.0
+channel,label,injected_fault,true_class,predicted_class,n_bd_true,n_bd_est,rs_true_ohm,rs_est_ohm,soiling_true_pct,soiling_est_pct,pid_rsh_true_ohm,dv_slope_ohm,dv_intercept_v,v_def_hi,i_def_hi,p_def_hi,p_def_lo,pid_droop,shade_score,shade_az_deg,shade_el_deg,true_loss_pct,annual_energy_mwh,lost_energy_true_mwh,lost_energy_est_mwh
+MPPT 1,MPPT 1: Healthy,Healthy,Healthy,Healthy,0,0,0.0,0.0,0.0,0.0,400.0,0.0403,-2.57,-0.0022,0.0027,-0.0005,0.0023,0.0029,0.0075,255.0,12.5,0.0,21.49,0.0,0.045
+MPPT 2,MPPT 2: 2 shorted bypass diodes (12 May),Shorted Bypass Diode,Shorted Bypass Diode,PID / Low R_sh,2,0,0.0,0.0,0.0,0.0,400.0,-0.1718,29.0685,0.0292,0.002,0.0296,0.0346,0.005,0.0067,275.0,17.5,2.7864,21.02,0.409,0.509
+MPPT 3,"MPPT 3: Corroded MC4, +2.5 Ohm over 21 days (1 Jul)",High Series Resistance R_s,High Series Resistance R_s,High Series Resistance R_s,0,0,2.5,2.083,0.0,0.0,400.0,2.0825,4.7873,0.0272,-0.0071,0.0186,0.0016,-0.017,0.0067,275.0,17.5,2.3962,21.45,0.198,0.084
+MPPT 4,"MPPT 4: PID on 4 modules, R_sh 400 -> 35 Ohm (1 Jun)",PID / Low R_sh,PID / Low R_sh,Partial Shading,0,0,0.0,0.0,0.0,0.0,40.6629,-2.4016,19.1355,-0.0073,0.045,0.0368,0.1368,0.1,0.0192,115.0,17.5,4.5639,20.78,0.536,0.747
+MPPT 5,MPPT 5: Morning obstacle shading 6 sub-strings,Partial Shading,Below impact,Partial Shading,0,0,0.0,0.0,0.0,0.0,400.0,-0.0511,-0.2329,-0.0007,0.0007,-0.0011,0.0031,0.0041,0.0917,105.0,12.5,0.3944,21.39,0.109,0.138
+MPPT 6,"MPPT 6: Soiling 0.08 %/day, rain-washed (1 Mar)",Uniform Soiling,Uniform Soiling,Shorted Bypass Diode,0,1,0.0,0.0,0.6039,0.0,400.0,0.1075,5.9302,0.0075,0.0077,0.0134,0.0161,0.0027,0.0099,115.0,17.5,0.6293,21.21,0.105,0.319
+MPPT 7,MPPT 7: 1 shorted bypass diode (1 Apr),Shorted Bypass Diode,Shorted Bypass Diode,Shorted Bypass Diode,1,1,0.0,0.0,0.0,0.0,400.0,0.0822,15.4563,0.0174,-0.0015,0.0142,0.0169,0.0026,0.011,95.0,12.5,1.396,21.22,0.253,0.316
+MPPT 8,MPPT 8: 4 shorted bypass diodes (15 Jun),Shorted Bypass Diode,Shorted Bypass Diode,PID / Low R_sh,4,0,0.0,0.0,0.0,0.0,400.0,-0.368,58.392,0.0584,-0.0006,0.0563,0.0617,0.0054,0.0094,85.0,17.5,5.5672,20.82,0.635,0.713
+MPPT 9,MPPT 9: Solder joint +1.5 Ohm (15 Apr),High Series Resistance R_s,High Series Resistance R_s,High Series Resistance R_s,0,0,1.5,1.462,0.0,0.0,400.0,1.4618,-1.7313,0.0138,-0.0029,0.0088,-0.0008,-0.0096,0.0063,85.0,17.5,1.4256,21.38,0.243,0.147
+MPPT 10,MPPT 10: Corroded MC4 +3.2 Ohm (30 Apr),High Series Resistance R_s,High Series Resistance R_s,High Series Resistance R_s,0,0,3.2,2.658,0.0,0.0,400.0,2.6575,-1.9697,0.026,0.0031,0.0274,0.0061,-0.0213,0.0074,95.0,12.5,3.0122,21.12,0.476,0.411
+MPPT 11,MPPT 11: Healthy,Healthy,Healthy,Healthy,0,0,0.0,0.0,0.0,0.0,400.0,0.1652,-1.0778,0.0007,-0.004,-0.005,-0.003,0.002,0.0051,275.0,17.5,0.0,21.59,0.0,-0.06
+MPPT 12,MPPT 12: Healthy,Healthy,Healthy,Healthy,0,0,0.0,0.0,0.0,0.0,400.0,0.1135,-5.5765,-0.0046,0.0033,-0.002,0.0004,0.0024,0.0059,265.0,12.5,0.0,21.53,0.0,0.001

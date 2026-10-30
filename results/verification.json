@@ -1,171 +1,589 @@
 {
-  "macro_f1": 0.968,
-  "total_windows": 312,
-  "class_metrics": {
-    "Healthy": {
-      "support": 146,
-      "tp": 146,
-      "fp": 8,
-      "fn": 0,
-      "precision": 0.9481,
-      "recall": 1.0,
-      "f1": 0.9733
-    },
-    "Shorted Bypass Diode": {
-      "support": 52,
-      "tp": 51,
-      "fp": 0,
-      "fn": 1,
-      "precision": 1.0,
-      "recall": 0.9808,
-      "f1": 0.9903
-    },
-    "High Series Resistance R_s": {
-      "support": 50,
-      "tp": 48,
-      "fp": 0,
-      "fn": 2,
-      "precision": 1.0,
-      "recall": 0.96,
-      "f1": 0.9796
-    },
-    "PID / Low R_sh": {
-      "support": 16,
-      "tp": 14,
-      "fp": 0,
-      "fn": 2,
-      "precision": 1.0,
-      "recall": 0.875,
-      "f1": 0.9333
-    },
-    "Partial Shading": {
-      "support": 26,
-      "tp": 25,
-      "fp": 0,
-      "fn": 1,
-      "precision": 1.0,
-      "recall": 0.9615,
-      "f1": 0.9804
-    },
-    "Uniform Soiling": {
-      "support": 22,
-      "tp": 20,
-      "fp": 0,
-      "fn": 2,
-      "precision": 1.0,
-      "recall": 0.9091,
-      "f1": 0.9524
-    }
-  },
-  "confusion_matrix": {
-    "Healthy": {
-      "Healthy": 146,
-      "Shorted Bypass Diode": 0,
-      "High Series Resistance R_s": 0,
-      "PID / Low R_sh": 0,
-      "Partial Shading": 0,
-      "Uniform Soiling": 0
-    },
-    "Shorted Bypass Diode": {
-      "Healthy": 1,
-      "Shorted Bypass Diode": 51,
-      "High Series Resistance R_s": 0,
-      "PID / Low R_sh": 0,
-      "Partial Shading": 0,
-      "Uniform Soiling": 0
-    },
-    "High Series Resistance R_s": {
-      "Healthy": 2,
-      "Shorted Bypass Diode": 0,
-      "High Series Resistance R_s": 48,
-      "PID / Low R_sh": 0,
-      "Partial Shading": 0,
-      "Uniform Soiling": 0
-    },
-    "PID / Low R_sh": {
-      "Healthy": 2,
-      "Shorted Bypass Diode": 0,
-      "High Series Resistance R_s": 0,
-      "PID / Low R_sh": 14,
-      "Partial Shading": 0,
-      "Uniform Soiling": 0
-    },
-    "Partial Shading": {
-      "Healthy": 1,
-      "Shorted Bypass Diode": 0,
-      "High Series Resistance R_s": 0,
-      "PID / Low R_sh": 0,
-      "Partial Shading": 25,
-      "Uniform Soiling": 0
-    },
-    "Uniform Soiling": {
-      "Healthy": 2,
-      "Shorted Bypass Diode": 0,
-      "High Series Resistance R_s": 0,
-      "PID / Low R_sh": 0,
-      "Partial Shading": 0,
-      "Uniform Soiling": 20
-    }
-  },
-  "bypass_diode_recovery": [
-    {
-      "channel": "MPPT 7",
-      "n_bd_true": 1,
-      "n_bd_est": 1,
-      "dv_true_v": 14.3,
-      "dv_est_v": 14.23,
-      "abs_error_v": 0.07
-    },
-    {
-      "channel": "MPPT 2",
-      "n_bd_true": 2,
-      "n_bd_est": 2,
-      "dv_true_v": 28.6,
-      "dv_est_v": 28.63,
-      "abs_error_v": 0.03
-    },
-    {
-      "channel": "MPPT 8",
-      "n_bd_true": 4,
-      "n_bd_est": 4,
-      "dv_true_v": 57.2,
-      "dv_est_v": 57.41,
-      "abs_error_v": 0.21
-    }
+  "tuning_seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008
   ],
-  "series_resistance_recovery": [
-    {
-      "channel": "MPPT 9",
-      "rs_true_ohm": 1.5,
-      "rs_est_ohm": 1.48,
-      "rel_error_pct": -1.33
-    },
-    {
-      "channel": "MPPT 3",
-      "rs_true_ohm": 2.5,
-      "rs_est_ohm": 2.47,
-      "rel_error_pct": -1.2
-    },
-    {
-      "channel": "MPPT 10",
-      "rs_true_ohm": 3.2,
-      "rs_est_ohm": 3.17,
-      "rel_error_pct": -0.94
-    }
+  "heldout_seeds": [
+    2001,
+    2002,
+    2003,
+    2004,
+    2005,
+    2006,
+    2007,
+    2008
   ],
-  "pid_verification": {
-    "channel": "MPPT 4",
-    "rsh_initial_ohm": 400.0,
-    "rsh_degraded_ohm": 35.0,
-    "n_negative_end_modules": 4,
-    "detection_latency_days": 14,
-    "low_g_voltage_drop_at_detection_pct": 2.2,
-    "steady_low_g_voltage_drop_pct": 3.23
+  "showcase_seed": 42,
+  "threshold_quantile": 0.99,
+  "min_impact_pct": 0.5,
+  "thresholds": {
+    "shade_score": 0.011086,
+    "pid_droop": 0.004493,
+    "dv_slope_ohm": 0.365579,
+    "v_def_hi": 0.007526,
+    "i_def_hi": 0.01004
   },
-  "soiling_verification": {
-    "channel": "MPPT 6",
-    "soiling_true_pct": 4.5,
-    "soiling_est_pct": 4.4,
-    "false_voltage_alarm_rate_pct": 0.0
+  "tuning": {
+    "inverters": 8,
+    "channel_windows": 2496,
+    "scored_windows": 2172,
+    "decided_pct": 90.1,
+    "healthy_false_alarm_pct": 5.1,
+    "macro_f1": 0.788,
+    "class_metrics": {
+      "Healthy": {
+        "support": 1506,
+        "tp": 1307,
+        "fp": 43,
+        "fn": 199,
+        "precision": 0.968,
+        "recall": 0.868,
+        "f1": 0.915
+      },
+      "Shorted Bypass Diode": {
+        "support": 169,
+        "tp": 144,
+        "fp": 14,
+        "fn": 25,
+        "precision": 0.911,
+        "recall": 0.852,
+        "f1": 0.881
+      },
+      "High Series Resistance R_s": {
+        "support": 177,
+        "tp": 152,
+        "fp": 14,
+        "fn": 25,
+        "precision": 0.916,
+        "recall": 0.859,
+        "f1": 0.886
+      },
+      "PID / Low R_sh": {
+        "support": 101,
+        "tp": 85,
+        "fp": 27,
+        "fn": 16,
+        "precision": 0.759,
+        "recall": 0.842,
+        "f1": 0.798
+      },
+      "Partial Shading": {
+        "support": 115,
+        "tp": 98,
+        "fp": 26,
+        "fn": 17,
+        "precision": 0.79,
+        "recall": 0.852,
+        "f1": 0.82
+      },
+      "Uniform Soiling": {
+        "support": 104,
+        "tp": 32,
+        "fp": 14,
+        "fn": 72,
+        "precision": 0.696,
+        "recall": 0.308,
+        "f1": 0.427
+      }
+    },
+    "confusion_matrix": {
+      "Healthy": {
+        "Healthy": 1307,
+        "Shorted Bypass Diode": 14,
+        "High Series Resistance R_s": 14,
+        "PID / Low R_sh": 14,
+        "Partial Shading": 14,
+        "Uniform Soiling": 14,
+        "No decision": 129
+      },
+      "Shorted Bypass Diode": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 144,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 1,
+        "Partial Shading": 1,
+        "Uniform Soiling": 0,
+        "No decision": 23
+      },
+      "High Series Resistance R_s": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 152,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 1,
+        "Uniform Soiling": 0,
+        "No decision": 24
+      },
+      "PID / Low R_sh": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 85,
+        "Partial Shading": 5,
+        "Uniform Soiling": 0,
+        "No decision": 11
+      },
+      "Partial Shading": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 98,
+        "Uniform Soiling": 0,
+        "No decision": 17
+      },
+      "Uniform Soiling": {
+        "Healthy": 43,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 12,
+        "Partial Shading": 5,
+        "Uniform Soiling": 32,
+        "No decision": 12
+      }
+    },
+    "excluded_windows": {
+      "Transition": {
+        "windows": 42,
+        "flagged_as_a_fault": 22
+      },
+      "Below impact": {
+        "windows": 282,
+        "flagged_as_a_fault": 78
+      }
+    },
+    "bypass_diode_count": {
+      "windows": 144,
+      "exact_pct": 95.8,
+      "table": {
+        "1": {
+          "1": 41,
+          "2": 6
+        },
+        "2": {
+          "2": 46
+        },
+        "3": {
+          "3": 39
+        },
+        "4": {
+          "4": 12
+        }
+      }
+    },
+    "series_resistance": {
+      "windows": 152,
+      "rel_error_pct_median": -8.2,
+      "rel_error_pct_p10": -14.4,
+      "rel_error_pct_p90": 1.7
+    },
+    "soiling": {
+      "windows": 32,
+      "error_pp_median": 0.68,
+      "abs_error_pp_median": 0.7
+    },
+    "detection": {
+      "Shorted Bypass Diode": {
+        "faulted_channels": 12,
+        "detected": 12,
+        "median_delay_days": 14.5
+      },
+      "High Series Resistance R_s": {
+        "faulted_channels": 17,
+        "detected": 17,
+        "median_delay_days": 15.0
+      },
+      "PID / Low R_sh": {
+        "faulted_channels": 7,
+        "detected": 7,
+        "median_delay_days": 27.0
+      },
+      "Partial Shading": {
+        "faulted_channels": 13,
+        "detected": 13,
+        "median_delay_days": 41.0
+      },
+      "Uniform Soiling": {
+        "faulted_channels": 9,
+        "detected": 7,
+        "median_delay_days": 31.0
+      }
+    }
+  },
+  "heldout": {
+    "inverters": 8,
+    "channel_windows": 2496,
+    "scored_windows": 2173,
+    "decided_pct": 86.0,
+    "healthy_false_alarm_pct": 7.0,
+    "macro_f1": 0.694,
+    "class_metrics": {
+      "Healthy": {
+        "support": 1491,
+        "tp": 1200,
+        "fp": 40,
+        "fn": 291,
+        "precision": 0.968,
+        "recall": 0.805,
+        "f1": 0.879
+      },
+      "Shorted Bypass Diode": {
+        "support": 207,
+        "tp": 142,
+        "fp": 24,
+        "fn": 65,
+        "precision": 0.855,
+        "recall": 0.686,
+        "f1": 0.761
+      },
+      "High Series Resistance R_s": {
+        "support": 140,
+        "tp": 120,
+        "fp": 44,
+        "fn": 20,
+        "precision": 0.732,
+        "recall": 0.857,
+        "f1": 0.789
+      },
+      "PID / Low R_sh": {
+        "support": 215,
+        "tp": 160,
+        "fp": 24,
+        "fn": 55,
+        "precision": 0.87,
+        "recall": 0.744,
+        "f1": 0.802
+      },
+      "Partial Shading": {
+        "support": 58,
+        "tp": 50,
+        "fp": 38,
+        "fn": 8,
+        "precision": 0.568,
+        "recall": 0.862,
+        "f1": 0.685
+      },
+      "Uniform Soiling": {
+        "support": 62,
+        "tp": 11,
+        "fp": 15,
+        "fn": 51,
+        "precision": 0.423,
+        "recall": 0.177,
+        "f1": 0.25
+      }
+    },
+    "confusion_matrix": {
+      "Healthy": {
+        "Healthy": 1200,
+        "Shorted Bypass Diode": 23,
+        "High Series Resistance R_s": 23,
+        "PID / Low R_sh": 20,
+        "Partial Shading": 9,
+        "Uniform Soiling": 15,
+        "No decision": 201
+      },
+      "Shorted Bypass Diode": {
+        "Healthy": 6,
+        "Shorted Bypass Diode": 142,
+        "High Series Resistance R_s": 21,
+        "PID / Low R_sh": 1,
+        "Partial Shading": 2,
+        "Uniform Soiling": 0,
+        "No decision": 35
+      },
+      "High Series Resistance R_s": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 1,
+        "High Series Resistance R_s": 120,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 1,
+        "Uniform Soiling": 0,
+        "No decision": 18
+      },
+      "PID / Low R_sh": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 160,
+        "Partial Shading": 23,
+        "Uniform Soiling": 0,
+        "No decision": 32
+      },
+      "Partial Shading": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 50,
+        "Uniform Soiling": 0,
+        "No decision": 8
+      },
+      "Uniform Soiling": {
+        "Healthy": 34,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 3,
+        "Partial Shading": 3,
+        "Uniform Soiling": 11,
+        "No decision": 11
+      }
+    },
+    "excluded_windows": {
+      "Transition": {
+        "windows": 46,
+        "flagged_as_a_fault": 23
+      },
+      "Below impact": {
+        "windows": 277,
+        "flagged_as_a_fault": 99
+      }
+    },
+    "bypass_diode_count": {
+      "windows": 142,
+      "exact_pct": 97.9,
+      "table": {
+        "1": {
+          "1": 11
+        },
+        "2": {
+          "2": 20
+        },
+        "3": {
+          "2": 3,
+          "3": 34
+        },
+        "4": {
+          "4": 74
+        }
+      }
+    },
+    "series_resistance": {
+      "windows": 120,
+      "rel_error_pct_median": -10.1,
+      "rel_error_pct_p10": -16.6,
+      "rel_error_pct_p90": 0.3
+    },
+    "soiling": {
+      "windows": 11,
+      "error_pp_median": 0.37,
+      "abs_error_pp_median": 0.37
+    },
+    "detection": {
+      "Shorted Bypass Diode": {
+        "faulted_channels": 17,
+        "detected": 16,
+        "median_delay_days": 17.0
+      },
+      "High Series Resistance R_s": {
+        "faulted_channels": 9,
+        "detected": 9,
+        "median_delay_days": 21.0
+      },
+      "PID / Low R_sh": {
+        "faulted_channels": 15,
+        "detected": 15,
+        "median_delay_days": 33.0
+      },
+      "Partial Shading": {
+        "faulted_channels": 10,
+        "detected": 10,
+        "median_delay_days": 48.0
+      },
+      "Uniform Soiling": {
+        "faulted_channels": 5,
+        "detected": 2,
+        "median_delay_days": 25.5
+      }
+    }
+  },
+  "showcase": {
+    "inverters": 1,
+    "channel_windows": 312,
+    "scored_windows": 282,
+    "decided_pct": 87.2,
+    "healthy_false_alarm_pct": 6.2,
+    "macro_f1": 0.677,
+    "class_metrics": {
+      "Healthy": {
+        "support": 145,
+        "tp": 120,
+        "fp": 1,
+        "fn": 25,
+        "precision": 0.992,
+        "recall": 0.828,
+        "f1": 0.902
+      },
+      "Shorted Bypass Diode": {
+        "support": 49,
+        "tp": 31,
+        "fp": 5,
+        "fn": 18,
+        "precision": 0.861,
+        "recall": 0.633,
+        "f1": 0.729
+      },
+      "High Series Resistance R_s": {
+        "support": 48,
+        "tp": 41,
+        "fp": 3,
+        "fn": 7,
+        "precision": 0.932,
+        "recall": 0.854,
+        "f1": 0.891
+      },
+      "PID / Low R_sh": {
+        "support": 14,
+        "tp": 10,
+        "fp": 14,
+        "fn": 4,
+        "precision": 0.417,
+        "recall": 0.714,
+        "f1": 0.526
+      },
+      "Partial Shading": {
+        "support": 15,
+        "tp": 12,
+        "fp": 7,
+        "fn": 3,
+        "precision": 0.632,
+        "recall": 0.8,
+        "f1": 0.706
+      },
+      "Uniform Soiling": {
+        "support": 11,
+        "tp": 2,
+        "fp": 0,
+        "fn": 9,
+        "precision": 1.0,
+        "recall": 0.182,
+        "f1": 0.308
+      }
+    },
+    "confusion_matrix": {
+      "Healthy": {
+        "Healthy": 120,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 2,
+        "PID / Low R_sh": 4,
+        "Partial Shading": 2,
+        "Uniform Soiling": 0,
+        "No decision": 17
+      },
+      "Shorted Bypass Diode": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 31,
+        "High Series Resistance R_s": 1,
+        "PID / Low R_sh": 10,
+        "Partial Shading": 1,
+        "Uniform Soiling": 0,
+        "No decision": 6
+      },
+      "High Series Resistance R_s": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 41,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 1,
+        "Uniform Soiling": 0,
+        "No decision": 6
+      },
+      "PID / Low R_sh": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 10,
+        "Partial Shading": 2,
+        "Uniform Soiling": 0,
+        "No decision": 2
+      },
+      "Partial Shading": {
+        "Healthy": 0,
+        "Shorted Bypass Diode": 0,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 12,
+        "Uniform Soiling": 0,
+        "No decision": 3
+      },
+      "Uniform Soiling": {
+        "Healthy": 1,
+        "Shorted Bypass Diode": 5,
+        "High Series Resistance R_s": 0,
+        "PID / Low R_sh": 0,
+        "Partial Shading": 1,
+        "Uniform Soiling": 2,
+        "No decision": 2
+      }
+    },
+    "excluded_windows": {
+      "Transition": {
+        "windows": 8,
+        "flagged_as_a_fault": 6
+      },
+      "Below impact": {
+        "windows": 22,
+        "flagged_as_a_fault": 11
+      }
+    },
+    "bypass_diode_count": {
+      "windows": 31,
+      "exact_pct": 100.0,
+      "table": {
+        "1": {
+          "1": 15
+        },
+        "2": {
+          "2": 10
+        },
+        "4": {
+          "4": 6
+        }
+      }
+    },
+    "series_resistance": {
+      "windows": 41,
+      "rel_error_pct_median": -12.2,
+      "rel_error_pct_p10": -18.8,
+      "rel_error_pct_p90": 0.8
+    },
+    "soiling": {
+      "windows": 2,
+      "error_pp_median": 0.24,
+      "abs_error_pp_median": 0.24
+    },
+    "detection": {
+      "Shorted Bypass Diode": {
+        "faulted_channels": 3,
+        "detected": 3,
+        "median_delay_days": 21.0
+      },
+      "High Series Resistance R_s": {
+        "faulted_channels": 3,
+        "detected": 3,
+        "median_delay_days": 14.0
+      },
+      "PID / Low R_sh": {
+        "faulted_channels": 1,
+        "detected": 1,
+        "median_delay_days": 16.0
+      },
+      "Partial Shading": {
+        "faulted_channels": 1,
+        "detected": 1,
+        "median_delay_days": 27.0
+      },
+      "Uniform Soiling": {
+        "faulted_channels": 1,
+        "detected": 1,
+        "median_delay_days": 234.0
+      }
+    }
   }
 }
