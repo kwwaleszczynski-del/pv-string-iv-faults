@@ -304,6 +304,8 @@ def generate_plots(sc: dict, ver: dict, heldout: pd.DataFrame, spec: InverterStr
     ax_dv.set_xlabel("MPPT current I_k [A]")
     ax_dv.set_ylabel("Peer voltage deficit V_peer - V_k [V]")
     ax_dv.set_title("Diagnostic plane, Aug-Sep (lines = robust fits)", fontsize=9.5)
+    lo, hi = ax_dv.get_ylim()
+    ax_dv.set_ylim(lo, hi + 0.62 * (hi - lo))  # room for the legend above the highest series
     ax_dv.legend(loc="upper left", fontsize=6.8)
 
     g_edges = np.arange(100.0, 1051.0, 75.0)
@@ -333,6 +335,8 @@ def generate_plots(sc: dict, ver: dict, heldout: pd.DataFrame, spec: InverterStr
     ax1.legend(loc="upper left", fontsize=7.0, ncol=2)
     ax2.set_ylabel("Daily median I_k / I_peer [-]")
     ax2.set_xlabel("Day of year (2025)")
+    lo, hi = ax2.get_ylim()
+    ax2.set_ylim(lo - 0.35 * (hi - lo), hi)  # room for the legend below the PID dips
     ax2.legend(loc="lower left", fontsize=7.0, ncol=2)
     ax2.set_xlim(1, 365)
     save(fig, "mppt_fleet_timeline.png")

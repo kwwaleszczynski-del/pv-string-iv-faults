@@ -165,13 +165,26 @@ const narrow = () => window.innerWidth < 640;
 const cfg = {responsive: true, displaylogo: false};
 
 function layoutBase(extra) {
-  return Object.assign({
+  // desktop: title at the top of the margin, legend in its own band between title and plot
+  const out = Object.assign({
     paper_bgcolor: css("--surface"), plot_bgcolor: css("--surface"),
     font: {family: "system-ui, -apple-system, Segoe UI, sans-serif", color: css("--ink2"), size: 12},
-    margin: {l: 56, r: 52, t: 36, b: 48},
+    margin: {l: 56, r: 52, t: narrow() ? 36 : 72, b: 48},
     hoverlabel: {bgcolor: css("--surface"), font: {color: css("--ink")}},
-    legend: narrow() ? {orientation: "h", y: -0.28, x: 0, font: {size: 10}} : {orientation: "h", y: 1.12, x: 0, font: {size: 11}}
+    legend: narrow() ? {orientation: "h", y: -0.28, x: 0, font: {size: 10}}
+                     : {orientation: "h", x: 0, y: 1.02, yanchor: "bottom", font: {size: 11}}
   }, extra);
+  if (out.title && !narrow()) out.title = Object.assign({x: 0.01, xanchor: "left", y: 1, yanchor: "top", pad: {t: 10}}, out.title);
+  if (out.title && narrow() && out.title.text.length > 44) {  // Plotly does not wrap titles; break them on phones
+    const lines = out.title.text.split(" ").reduce((ls, w) => {
+      const last = ls[ls.length - 1];
+      if (last && (last + " " + w).length <= 44) ls[ls.length - 1] = last + " " + w; else ls.push(w);
+      return ls;
+    }, []);
+    out.title = Object.assign({}, out.title, {text: lines.join("<br>")});
+    out.margin = Object.assign({}, out.margin, {t: out.margin.t + 16 * (lines.length - 1)});
+  }
+  return out;
 }
 const axis = extra => Object.assign({gridcolor: css("--grid"), linecolor: css("--axis"), zeroline: false}, extra);
 
