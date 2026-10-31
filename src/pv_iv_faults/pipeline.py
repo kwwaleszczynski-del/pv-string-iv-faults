@@ -78,6 +78,10 @@ def _split_report(pred: pd.DataFrame, scenarios_by_seed: dict[int, list]) -> dic
     healthy = scored[scored["true_class"] == "Healthy"]
     healthy_decided = healthy[healthy["predicted_class"] != NO_DECISION]
     faults_flagged = lambda df: int((~df["predicted_class"].isin(["Healthy", NO_DECISION])).sum())
+    # operational reading: an inverter whose channels are all healthy, undecided windows count as no alarm
+    n_channels, n_windows = pred["channel"].nunique(), pred["window"].nunique()
+    fa_per_inverter_window = n_channels * faults_flagged(healthy) / max(len(healthy), 1)
+    healthy_fa = healthy[~healthy["predicted_class"].isin(["Healthy", NO_DECISION])]
 
     excluded = {}
     for lbl in ("Transition", "Below impact"):
@@ -106,6 +110,10 @@ def _split_report(pred: pd.DataFrame, scenarios_by_seed: dict[int, list]) -> dic
         "scored_windows": len(scored),
         "decided_pct": round(100.0 * float((scored["predicted_class"] != NO_DECISION).mean()), 1),
         "healthy_false_alarm_pct": round(100.0 * faults_flagged(healthy_decided) / max(len(healthy_decided), 1), 1),
+        "false_alarms_per_inverter_window": round(fa_per_inverter_window, 2),
+        "false_alarms_per_inverter_year": round(fa_per_inverter_window * n_windows, 1),
+        "healthy_channels": int(healthy.groupby(["seed", "channel"]).ngroups),
+        "healthy_channels_with_false_alarm": int(healthy_fa.groupby(["seed", "channel"]).ngroups),
         **scores,
         "excluded_windows": excluded,
         "bypass_diode_count": {
@@ -174,6 +182,9 @@ def summary_markdown(ver: dict, table: pd.DataFrame) -> str:
         "",
         f"Held-out: {h['inverters']} inverters x 12 channels x 26 windows; {h['decided_pct']:.1f} % of scored windows had enough "
         f"irradiance for a decision; {h['healthy_false_alarm_pct']:.1f} % of decided healthy windows raised a fault alarm. "
+        f"In operation, an inverter with all 12 channels healthy would get {h['false_alarms_per_inverter_window']:.2f} false "
+        f"alarms per 14-day window, about {h['false_alarms_per_inverter_year']:.0f} a year; they came from "
+        f"{h['healthy_channels_with_false_alarm']} of the {h['healthy_channels']} healthy channels. "
         f"Excluded from scoring: {h['excluded_windows']['Transition']['windows']} onset windows and "
         f"{h['excluded_windows']['Below impact']['windows']} windows whose fault cost less than {MIN_IMPACT_PCT:.1f} % of the "
         f"window's energy ({h['excluded_windows']['Below impact']['flagged_as_a_fault']} of them were still flagged).",

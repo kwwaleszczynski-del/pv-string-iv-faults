@@ -35,6 +35,10 @@
     "scored_windows": 2172,
     "decided_pct": 90.1,
     "healthy_false_alarm_pct": 5.1,
+    "false_alarms_per_inverter_window": 0.56,
+    "false_alarms_per_inverter_year": 14.5,
+    "healthy_channels": 83,
+    "healthy_channels_with_false_alarm": 28,
     "macro_f1": 0.788,
     "class_metrics": {
       "Healthy": {
@@ -222,6 +226,10 @@
     "scored_windows": 2173,
     "decided_pct": 86.0,
     "healthy_false_alarm_pct": 7.0,
+    "false_alarms_per_inverter_window": 0.72,
+    "false_alarms_per_inverter_year": 18.8,
+    "healthy_channels": 86,
+    "healthy_channels_with_false_alarm": 25,
     "macro_f1": 0.694,
     "class_metrics": {
       "Healthy": {
@@ -409,6 +417,10 @@
     "scored_windows": 282,
     "decided_pct": 87.2,
     "healthy_false_alarm_pct": 6.2,
+    "false_alarms_per_inverter_window": 0.66,
+    "false_alarms_per_inverter_year": 17.2,
+    "healthy_channels": 11,
+    "healthy_channels_with_false_alarm": 6,
     "macro_f1": 0.677,
     "class_metrics": {
       "Healthy": {

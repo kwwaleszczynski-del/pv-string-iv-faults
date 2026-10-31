@@ -10,7 +10,7 @@
 | Uniform Soiling | 62 | 0.423 | 0.177 | 0.250 | 0.427 |
 | **Macro-F1** | 2173 | | | **0.694** | 0.788 |
 
-Held-out: 8 inverters x 12 channels x 26 windows; 86.0 % of scored windows had enough irradiance for a decision; 7.0 % of decided healthy windows raised a fault alarm. Excluded from scoring: 46 onset windows and 277 windows whose fault cost less than 0.5 % of the window's energy (99 of them were still flagged).
+Held-out: 8 inverters x 12 channels x 26 windows; 86.0 % of scored windows had enough irradiance for a decision; 7.0 % of decided healthy windows raised a fault alarm. In operation, an inverter with all 12 channels healthy would get 0.72 false alarms per 14-day window, about 19 a year; they came from 25 of the 86 healthy channels. Excluded from scoring: 46 onset windows and 277 windows whose fault cost less than 0.5 % of the window's energy (99 of them were still flagged).
 
 | Parameter (held-out, correctly classified windows) | Windows | Result |
 |---|---:|---|
